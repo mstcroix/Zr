@@ -1,0 +1,212 @@
+#!/usr/bin/env bash
+# doc.cmd.exe — Command Database: lookup, record, replay
+# ─────────────────────────────────────────────────────────────────────────────
+# Every command executed in this project passes through here.
+# Prevents redundant re-runs. Builds an auditable history.
+#
+# Usage:
+#   doc.cmd.exe run   "git --version"        # run + record
+#   doc.cmd.exe check "git --version"        # lookup only, no run
+#   doc.cmd.exe list                         # list all recorded commands
+#   doc.cmd.exe search "python"              # search by keyword
+#   doc.cmd.exe show  "git --version"        # show full entry
+#   doc.cmd.exe stats                        # summary statistics
+# ─────────────────────────────────────────────────────────────────────────────
+
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo "$(dirname "$0")")"
+DB="$REPO_ROOT/log.commands.json"
+TODAY="$(date +%Y-%m-%d)"
+
+# ── colour helpers ────────────────────────────────────────────────────────────
+RED='\033[0;31m'; GRN='\033[0;32m'; YLW='\033[0;33m'
+BLU='\033[0;34m'; CYN='\033[0;36m'; DIM='\033[2m'; RST='\033[0m'
+
+die()  { echo -e "${RED}✗ $*${RST}" >&2; exit 1; }
+info() { echo -e "${CYN}ℹ $*${RST}"; }
+ok()   { echo -e "${GRN}✓ $*${RST}"; }
+warn() { echo -e "${YLW}⚠ $*${RST}"; }
+
+# ── require jq ───────────────────────────────────────────────────────────────
+require_jq() {
+  command -v jq &>/dev/null || die "jq not found. Install: winget install stedolan.jq"
+}
+
+# ── normalize command string ──────────────────────────────────────────────────
+normalize() { echo "$*" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'; }
+
+# ── check if command exists in DB ────────────────────────────────────────────
+db_exists() {
+  require_jq
+  local key; key="$(normalize "$1")"
+  jq -e --arg k "$key" '.commands[$k] != null' "$DB" &>/dev/null
+}
+
+# ── get field from DB entry ───────────────────────────────────────────────────
+db_get() {
+  require_jq
+  local key="$1" field="$2"
+  jq -r --arg k "$key" --arg f "$field" '.commands[$k][$f] // "—"' "$DB"
+}
+
+# ── increment counter and update last_run ────────────────────────────────────
+db_bump() {
+  require_jq
+  local key; key="$(normalize "$1")"
+  local output="${2:-}"
+  local tmp; tmp="$(mktemp)"
+  jq --arg k "$key" --arg d "$TODAY" --arg o "$output" '
+    .commands[$k].count    += 1 |
+    .commands[$k].last_run  = $d |
+    if $o != "" then .commands[$k].last_output = $o else . end |
+    .updated = $d
+  ' "$DB" > "$tmp" && mv "$tmp" "$DB"
+}
+
+# ── add new entry to DB ───────────────────────────────────────────────────────
+db_add() {
+  require_jq
+  local key; key="$(normalize "$1")"
+  local output="${2:-}" purpose="${3:-}" tags="${4:-[]}"
+  local tmp; tmp="$(mktemp)"
+  jq --arg k "$key" --arg d "$TODAY" --arg o "$output" \
+     --arg p "$purpose" --argjson t "$tags" '
+    .commands[$k] = {
+      cmd:         $k,
+      purpose:     $p,
+      tags:        $t,
+      count:       1,
+      first_run:   $d,
+      last_run:    $d,
+      last_output: $o
+    } |
+    .updated = $d
+  ' "$DB" > "$tmp" && mv "$tmp" "$DB"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# COMMANDS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+cmd_run() {
+  require_jq
+  local raw_cmd="$*"
+  local key; key="$(normalize "$raw_cmd")"
+
+  if db_exists "$key"; then
+    local count; count="$(db_get "$key" count)"
+    local last;  last="$(db_get "$key" last_run)"
+    local prev;  prev="$(db_get "$key" last_output)"
+    warn "KNOWN COMMAND (seen ${count}×, last: ${last})"
+    echo -e "  ${DIM}Previous output:${RST} ${prev}"
+    echo -e "  ${DIM}Command:${RST}         ${BLU}${key}${RST}"
+    echo ""
+    read -r -p "  Re-run anyway? [y/N] " ans
+    if [[ ! "$ans" =~ ^[Yy]$ ]]; then
+      info "Skipped. Using cached output."
+      db_bump "$key"
+      echo "$prev"
+      return 0
+    fi
+  fi
+
+  info "Running: ${BLU}${key}${RST}"
+  local output
+  output="$(eval "$key" 2>&1)" || true
+  echo "$output"
+
+  if db_exists "$key"; then
+    db_bump "$key" "$output"
+    ok "Counter updated (now $(($(db_get "$key" count))) runs)"
+  else
+    db_add "$key" "$output" "" '["new"]'
+    ok "New command recorded in log.commands.json"
+  fi
+}
+
+cmd_check() {
+  require_jq
+  local key; key="$(normalize "$*")"
+  if db_exists "$key"; then
+    local count last prev purpose tags
+    count=$(db_get "$key" count); last=$(db_get "$key" last_run)
+    prev=$(db_get "$key" last_output); purpose=$(db_get "$key" purpose)
+    tags=$(jq -r --arg k "$key" '.commands[$k].tags | join(", ")' "$DB")
+    echo -e "\n${GRN}● FOUND in database${RST}"
+    echo -e "  ${DIM}Command:${RST}  ${BLU}${key}${RST}"
+    echo -e "  ${DIM}Purpose:${RST}  $purpose"
+    echo -e "  ${DIM}Tags:${RST}     $tags"
+    echo -e "  ${DIM}Runs:${RST}     ${count} (last: $last)"
+    echo -e "  ${DIM}Output:${RST}   $prev\n"
+  else
+    warn "NOT in database: ${key}"
+    echo -e "  ${DIM}Run it with:${RST} doc.cmd.exe run \"${key}\"\n"
+  fi
+}
+
+cmd_list() {
+  require_jq
+  echo -e "\n${CYN}Command Database — ${BLU}$(jq '.commands | length' "$DB")${CYN} entries${RST}\n"
+  printf "  %-3s  %-50s  %-12s  %s\n" "#" "COMMAND" "LAST RUN" "RUNS"
+  printf "  %-3s  %-50s  %-12s  %s\n" "───" "──────────────────────────────────────────────────" "────────────" "────"
+  local i=1
+  jq -r '.commands | to_entries[] | "\(.value.count) \(.value.last_run) \(.key)"' "$DB" \
+    | sort -rn \
+    | while IFS=' ' read -r count last cmd; do
+        printf "  %-3s  %-50s  %-12s  %s\n" "$i" "${cmd:0:50}" "$last" "${count}×"
+        ((i++)) || true
+      done
+  echo ""
+}
+
+cmd_search() {
+  require_jq
+  local kw="$*"
+  echo -e "\n${CYN}Search: \"${kw}\"${RST}\n"
+  jq -r --arg kw "$kw" '
+    .commands | to_entries[]
+    | select(
+        (.key | ascii_downcase | contains($kw | ascii_downcase)) or
+        (.value.purpose | ascii_downcase | contains($kw | ascii_downcase)) or
+        (.value.tags[]? | ascii_downcase | contains($kw | ascii_downcase))
+      )
+    | "  [\(.value.count)×]  \(.key)\n         └─ \(.value.purpose)"
+  ' "$DB"
+  echo ""
+}
+
+cmd_show() {
+  require_jq
+  local key; key="$(normalize "$*")"
+  if db_exists "$key"; then
+    jq --arg k "$key" '.commands[$k]' "$DB"
+  else
+    warn "Not found: $key"
+  fi
+}
+
+cmd_stats() {
+  require_jq
+  local total unique top
+  total=$(jq '[.commands[].count] | add'      "$DB")
+  unique=$(jq '.commands | length'            "$DB")
+  top=$(jq -r '[.commands | to_entries[] | {k:.key, c:.value.count}] | sort_by(-.c) | .[0] | "\(.c)× \(.k)"' "$DB")
+  echo -e "\n${CYN}Command Database Stats${RST}"
+  echo -e "  Total executions : ${GRN}${total}${RST}"
+  echo -e "  Unique commands  : ${GRN}${unique}${RST}"
+  echo -e "  Most run         : ${BLU}${top}${RST}\n"
+}
+
+# ── dispatch ─────────────────────────────────────────────────────────────────
+ACTION="${1:-list}"; shift 2>/dev/null || true
+
+case "$ACTION" in
+  run)    cmd_run    "$@" ;;
+  check)  cmd_check  "$@" ;;
+  list)   cmd_list        ;;
+  search) cmd_search "$@" ;;
+  show)   cmd_show   "$@" ;;
+  stats)  cmd_stats       ;;
+  *)      echo "Usage: doc.cmd.exe [run|check|list|search|show|stats] [command]"; exit 1 ;;
+esac

@@ -86,6 +86,40 @@ Still pending: GitHub username, git name/email, repo name.
 
 ---
 
+## #012 — log.commands.json + doc.cmd.exe + status-quo audit
+
+**Date:** 2026-04-02
+**Prompt:**
+> Create a way so you avoid repeating commands. Before a new command is executed, it must be looked over in a local database (plain json text with key=command). If available then reused. If not then a new entry is added. Every repetition increments the occurrence counter. Think .bash_history but rewindable, navigable, searchable, replicable.
+> Create a new bitacora with the current tooling and state — like ./configure — check which tools exist, which dependencies are fulfilled, which need satisfying, then take action.
+
+**Thinking:**
+- Command DB: plain JSON, key = normalized command string, value = {cmd, purpose, tags, count, first/last_run, last_output}
+- doc.cmd.exe: bash script wrapping command execution — check DB before run, prompt if known, increment counter, add if new. Subcommands: run, check, list, search, show, stats
+- Requires jq for JSON manipulation — jq is NOT INSTALLED (🔴 BLOCKING)
+- Status-quo audit: full ./configure-style dependency matrix — what's installed, what's missing, what's blocking, dependency graph, ordered action plan
+- Critical finding: only ~843 MB RAM free — low for compilation, document warning
+- log.commands.json seeded with 22 commands from session history
+
+**Answer:**
+
+Created:
+- `log.commands.json` — 22 commands, all session history, manually maintained until jq arrives
+- `doc.cmd.exe` — full command DB tool (run/check/list/search/show/stats)
+- `entries/2026-04-02-status-quo.md` — full machine audit
+
+Key findings from audit:
+| Status | Tools |
+|---|---|
+| ✓ Working | git 2.53.0, gh 2.89.0, winget 1.28.220, curl 8.18.0, ssh 10.2p1, openssl 3.5.5, awk, diff |
+| 🔴 Blocking | jq (blocks doc.cmd.exe) |
+| ✗ Missing | gcc, make, cmake, ninja, Python (real), Node, WSL2 |
+| ⚠ Partial | Python (stub), wsl.exe (stub, no distro) |
+
+Next action: `winget install stedolan.jq` (no admin, no reboot).
+
+---
+
 ## #011 — doc.companion.html + doc.companion.server.ps1
 
 **Date:** 2026-04-02

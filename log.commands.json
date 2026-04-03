@@ -1,0 +1,205 @@
+{
+  "version": "1.0",
+  "description": "Command execution database. Key = normalized command string. Every command run in this project is recorded here. Repeated commands increment the counter. This is .bash_history but structured, searchable, and replayable.",
+  "updated": "2026-04-02",
+  "commands": {
+    "uname -a": {
+      "cmd": "uname -a",
+      "purpose": "Identify OS, kernel, architecture",
+      "tags": ["env", "verify"],
+      "count": 1,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "MINGW64_NT-10.0-19045 DESKTOP-ICIQ279 3.6.6-1cdd4371.x86_64 2026-01-15 22:20 UTC x86_64 Msys"
+    },
+    "git --version": {
+      "cmd": "git --version",
+      "purpose": "Verify git installation and version",
+      "tags": ["git", "verify"],
+      "count": 2,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "git version 2.53.0.windows.2"
+    },
+    "git config user.name": {
+      "cmd": "git config user.name",
+      "purpose": "Read git identity name from local repo config",
+      "tags": ["git", "config"],
+      "count": 1,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "Marco Santacruz"
+    },
+    "git config user.email": {
+      "cmd": "git config user.email",
+      "purpose": "Read git identity email from local repo config",
+      "tags": ["git", "config"],
+      "count": 1,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "marco.santacruz@gmail.com"
+    },
+    "gh --version": {
+      "cmd": "gh --version",
+      "purpose": "Verify GitHub CLI installation and version",
+      "tags": ["gh", "verify"],
+      "count": 2,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "gh version 2.89.0 (2026-03-26)"
+    },
+    "gh auth status": {
+      "cmd": "gh auth status",
+      "purpose": "Verify GitHub CLI authentication state",
+      "tags": ["gh", "auth", "verify"],
+      "count": 1,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "Logged in to github.com account mstcroix (keyring). Token scopes: gist, read:org, repo"
+    },
+    "winget --version": {
+      "cmd": "winget --version",
+      "purpose": "Verify winget package manager availability",
+      "tags": ["winget", "verify"],
+      "count": 2,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "v1.28.220"
+    },
+    "winget install --id GitHub.cli": {
+      "cmd": "winget install --id GitHub.cli",
+      "purpose": "Install GitHub CLI via winget",
+      "tags": ["winget", "install", "gh"],
+      "count": 1,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "Instalado correctamente. gh version 2.89.0"
+    },
+    "scoop --version": {
+      "cmd": "scoop --version",
+      "purpose": "Check if scoop package manager is available",
+      "tags": ["scoop", "verify"],
+      "count": 1,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "NOT FOUND"
+    },
+    "choco --version": {
+      "cmd": "choco --version",
+      "purpose": "Check if Chocolatey package manager is available",
+      "tags": ["choco", "verify"],
+      "count": 1,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "NOT FOUND"
+    },
+    "wsl --list --verbose": {
+      "cmd": "wsl --list --verbose",
+      "purpose": "List installed WSL distributions",
+      "tags": ["wsl", "verify"],
+      "count": 2,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "No distributions installed. wsl.exe stub present."
+    },
+    "python --version": {
+      "cmd": "python --version",
+      "purpose": "Check Python availability and version",
+      "tags": ["python", "verify"],
+      "count": 3,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "NOT FOUND. WindowsApps stub only (Microsoft Store redirect, not real install)"
+    },
+    "node --version": {
+      "cmd": "node --version",
+      "purpose": "Check Node.js availability and version",
+      "tags": ["node", "verify"],
+      "count": 1,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "NOT FOUND"
+    },
+    "whoami": {
+      "cmd": "whoami",
+      "purpose": "Identify current OS user",
+      "tags": ["env", "verify"],
+      "count": 1,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "ACER"
+    },
+    "gcc --version": {
+      "cmd": "gcc --version",
+      "purpose": "Check C compiler availability",
+      "tags": ["build", "compiler", "verify"],
+      "count": 1,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "NOT FOUND"
+    },
+    "make --version": {
+      "cmd": "make --version",
+      "purpose": "Check GNU make build tool availability",
+      "tags": ["build", "verify"],
+      "count": 1,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "NOT FOUND"
+    },
+    "cmake --version": {
+      "cmd": "cmake --version",
+      "purpose": "Check CMake build system availability",
+      "tags": ["build", "verify"],
+      "count": 1,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "NOT FOUND"
+    },
+    "jq --version": {
+      "cmd": "jq --version",
+      "purpose": "Check jq JSON processor availability — required by doc.cmd.exe",
+      "tags": ["tools", "json", "verify", "CRITICAL"],
+      "count": 1,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "NOT FOUND — BLOCKS doc.cmd.exe"
+    },
+    "curl --version": {
+      "cmd": "curl --version",
+      "purpose": "Check curl HTTP client availability and version",
+      "tags": ["network", "verify"],
+      "count": 1,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "curl 8.18.0 (x86_64-w64-mingw32) libcurl/8.18.0 Schannel zlib/1.3.1"
+    },
+    "ssh -V": {
+      "cmd": "ssh -V",
+      "purpose": "Check OpenSSH availability and version",
+      "tags": ["network", "ssh", "verify"],
+      "count": 1,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "OpenSSH_10.2p1, OpenSSL 3.5.5 27 Jan 2026"
+    },
+    "openssl version": {
+      "cmd": "openssl version",
+      "purpose": "Check OpenSSL cryptography library version",
+      "tags": ["network", "crypto", "verify"],
+      "count": 1,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "OpenSSL 3.5.5 27 Jan 2026"
+    },
+    "powershell -Command Get-Host": {
+      "cmd": "powershell -Command Get-Host",
+      "purpose": "Check PowerShell version",
+      "tags": ["env", "powershell", "verify"],
+      "count": 1,
+      "first_run": "2026-04-02",
+      "last_run": "2026-04-02",
+      "last_output": "PowerShell 5.1.19041.6456"
+    }
+  }
+}
