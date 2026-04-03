@@ -86,6 +86,34 @@ Still pending: GitHub username, git name/email, repo name.
 
 ---
 
+## #004 — GitHub identity and repo name
+
+**Date:** 2026-04-02
+**Prompt:**
+> mstcroix
+> marco.santacruz@gmail.com
+> repo-name: Zr
+
+**Thinking:**
+- Update local git config with real identity (was placeholder ACER/acer@localhost)
+- `gh` CLI not installed — cannot create GitHub repo from CLI
+- Options: (A) user creates repo manually at github.com/new then we add remote + push, or (B) install `gh` CLI first (more aligned with "document everything" philosophy)
+- Repo name `Zr` — short, clean, intentional. Will live at github.com/mstcroix/Zr
+
+**Answer:**
+
+Git identity updated:
+- `user.name` = Marco Santacruz
+- `user.email` = marco.santacruz@gmail.com
+- Scope: local (this repo only)
+
+`gh` CLI not installed — cannot create remote repo programmatically yet.
+Awaiting user choice: manual repo creation vs. installing `gh` CLI first.
+
+Target remote: `https://github.com/mstcroix/Zr`
+
+---
+
 ## #003 — Version-control the prompts
 
 **Date:** 2026-04-02
