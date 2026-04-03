@@ -86,6 +86,35 @@ Still pending: GitHub username, git name/email, repo name.
 
 ---
 
+## #009 — doc.git.hook-commit.exe: auto-sync README Journal Entries
+
+**Date:** 2026-04-02
+**Prompt:**
+> Create first a doc.git.hook-commit.exe file that keeps the README.md "Journal Entries" sections up-to-date and in sync with the event folder. This file should be called at every git commit. Autonomously.
+
+**Thinking:**
+- Hook must be version-controlled (repo root) AND wired into `.git/hooks/pre-commit`
+- Two-file approach: `doc.git.hook-commit.exe` (logic, tracked) + `.git/hooks/pre-commit` (thin delegator, untracked)
+- Algorithm: scan `entries/*.md` → extract date from filename prefix + title from first `# ` line → rebuild Journal Entries block in README.md using awk to replace only that section
+- Sort order problem: alphabetical puts `chapter1` before `day0` (`c < d`) — wrong. Fixed by sorting on git first-commit order via `git log --diff-filter=A --reverse`. New uncommitted files appended at end.
+- Auto-stage README.md only if diff shows a real change (idempotent)
+- `exit 0` always — hook must never block a commit
+- Verified: hook fired during its own commit, auto-included README.md (`2 files changed`)
+
+**Answer:**
+
+Created `doc.git.hook-commit.exe` (bash, version-controlled at repo root).
+Created `.git/hooks/pre-commit` (thin delegator, calls the above).
+
+Hook behavior per commit:
+1. Reads `entries/*.md` sorted by git commit history (chronological)
+2. Extracts `YYYY-MM-DD` from filename, `# Title` from file content
+3. Rebuilds `## Journal Entries` section in README.md via awk
+4. Stages README.md if changed — silently, autonomously
+5. `exit 0` always
+
+---
+
 ## #008 — gh auth login browser flow + repo Zr created + push
 
 **Date:** 2026-04-02
