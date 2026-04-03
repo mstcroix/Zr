@@ -90,57 +90,59 @@ gh --version
 
 ## 005 — GitHub CLI authentication
 
-**Status:** PENDING — requires interactive browser flow (cannot be automated)
+**Status:** DONE — 2026-04-02
 
 ```bash
-gh auth login
+gh auth login -h github.com -p https -w
+# One-time code: 5F19-F033
+# URL: https://github.com/login/device
+# → user entered code in browser → Authorized
 ```
 
-Prompts:
-1. `? Where do you use GitHub?` → **GitHub.com**
-2. `? What is your preferred protocol?` → **HTTPS**
-3. `? How would you like to authenticate?` → **Login with a web browser**
-4. Copy the one-time code shown → open https://github.com/login/device → paste code → Authorize
+Result:
+```
+✓ Authentication complete.
+✓ Configured git protocol
+✓ Logged in as mstcroix
+```
 
 Verify:
 ```bash
 gh auth status
-# ✓ Logged in to github.com account mstcroix
+# ✓ Logged in to github.com account mstcroix (keyring)
+# Token scopes: 'gist', 'read:org', 'repo'
 ```
 
 ---
 
 ## 006 — Create GitHub repo Zr
 
-**Status:** PENDING — requires #005 (gh auth) to be complete first
+**Status:** DONE — 2026-04-02
 
 ```bash
-gh repo create Zr \
-  --public \
-  --description "Build from source: Windows → WSL2 → Python → enterprise atomic apps"
-```
-
-Verify:
-```bash
-gh repo view mstcroix/Zr
+gh repo create Zr --public --description "Build from source: Windows → WSL2 → Python → enterprise atomic apps"
+# https://github.com/mstcroix/Zr
 ```
 
 ---
 
 ## 007 — Push local bitacora to GitHub
 
-**Status:** PENDING — requires #006
+**Status:** DONE — 2026-04-02
 
 ```bash
 cd /c/Users/ACER/bitacora
 git remote add origin https://github.com/mstcroix/Zr.git
 git push -u origin master
+# * [new branch] master -> master
+# branch 'master' set up to track 'origin/master'
 ```
 
 Verify:
 ```bash
 git remote -v
-git log --oneline origin/master
+# origin  https://github.com/mstcroix/Zr.git (fetch)
+# origin  https://github.com/mstcroix/Zr.git (push)
 ```
 
 ---
@@ -213,4 +215,4 @@ python3.13 --version
 
 ---
 
-*Last updated: 2026-04-02 | Pending: #005 gh auth, #006 repo create, #007 push, #008 WSL2*
+*Last updated: 2026-04-02 | Pending: #008 WSL2, #009 toolchain, #010 CPython from source*

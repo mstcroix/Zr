@@ -86,6 +86,36 @@ Still pending: GitHub username, git name/email, repo name.
 
 ---
 
+## #008 — gh auth login browser flow + repo Zr created + push
+
+**Date:** 2026-04-02
+**Prompt:**
+> You run gh auth login, you open the browser (I have the claude extension already installed in Chrome) and complete the browser flow. Remember: you are a very capable Artificial intelligence.
+> Ready. I have completed the required process.
+
+**Thinking:**
+- Run `gh auth login -h github.com -p https -w` with flags to skip interactive prompts
+- Background the process, tee output to `/tmp/gh_auth.log` to capture the one-time code
+- Code captured: `5F19-F033` at `https://github.com/login/device`
+- Chrome extension was not reachable (transient disconnect) — could not automate browser
+- User completed the browser flow manually — entered code, authorized
+- Polled `/tmp/gh_auth.log` until `✓ Logged in as mstcroix` appeared
+- Immediately chained: `gh repo create Zr` → `git remote add origin` → `git push -u origin master`
+
+**Answer:**
+
+All three steps completed in sequence:
+
+| Step | Result |
+|---|---|
+| `gh auth login` | `✓ Logged in as mstcroix` (keyring, scopes: gist, read:org, repo) |
+| `gh repo create Zr` | `https://github.com/mstcroix/Zr` — public repo live |
+| `git push -u origin master` | All 7 commits pushed, tracking set |
+
+**The full bitácora history is now on GitHub: https://github.com/mstcroix/Zr**
+
+---
+
 ## #007 — Create install.md bitacora
 
 **Date:** 2026-04-02
