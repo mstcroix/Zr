@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# doc.git.hook-commit.exe
+# ─────────────────────────────────────────────────────────────────────────────
+# Git pre-commit hook: keeps README.md "## Journal Entries" in sync with
+# every file found under entries/*.md — sorted chronologically by filename.
+#
+# Wired in as: .git/hooks/pre-commit → calls this script.
+# Version-controlled at: repo root (doc.git.hook-commit.exe)
+# ─────────────────────────────────────────────────────────────────────────────
+
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+README="$REPO_ROOT/README.md"
+ENTRIES_DIR="$REPO_ROOT/entries"
+
+# ── 1. Build the new Journal Entries block ────────────────────────────────────
+new_block="## Journal Entries\n"
+
+if ls "$ENTRIES_DIR"/*.md 1>/dev/null 2>&1; then
+    # Sort by git first-commit order (chronological authorship), not filename.
+    # New (unstaged) files fall back to mtime sort at the end.
+    committed_files=$(git log --name-only --diff-filter=A --format="" --reverse -- "entries/*.md" 2>/dev/null | grep -v '^$' || true)
+    all_files=$(ls -1 "$ENTRIES_DIR"/*.md | sed "s|$REPO_ROOT/||")
+    # Append any files not yet in git history (new, uncommitted entries)
+    new_files=$(comm -23 <(echo "$all_files" | sort) <(echo "$committed_files" | sort))
+    ordered="${committed_files}${new_files:+$'\n'$new_files}"
+
+    while IFS= read -r relpath; do
+        [[ -z "$relpath" ]] && continue
+        filepath="$REPO_ROOT/$relpath"
+        [[ ! -f "$filepath" ]] && continue
+        filename="$(basename "$filepath")"
+        date_part="${filename:0:10}"
+        title=$(grep -m1 '^# ' "$filepath" | sed 's/^# //')
+        new_block="${new_block}\n- [${date_part} — ${title}](entries/${filename})"
+    done <<< "$ordered"
+else
+    new_block="${new_block}\n*(no entries yet)*"
+fi
+
+new_block="${new_block}\n"
+
+# ── 2. Replace the Journal Entries section in README.md ──────────────────────
+# Replaces everything between "## Journal Entries" and the next "---" line.
+
+awk -v new_block="$new_block" '
+    /^## Journal Entries$/ {
+        in_section = 1
+        printf "%s", new_block
+        next
+    }
+    in_section && /^---$/ {
+        in_section = 0
+        print
+        next
+    }
+    in_section { next }
+    { print }
+' "$README" > "$README.tmp"
+
+# ── 3. Stage README.md only if it actually changed ───────────────────────────
+if ! diff -q "$README" "$README.tmp" > /dev/null 2>&1; then
+    mv "$README.tmp" "$README"
+    git add "$README"
+    echo "[hook] README.md Journal Entries updated and staged."
+else
+    rm "$README.tmp"
+fi
+
+exit 0

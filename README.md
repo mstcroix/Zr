@@ -18,8 +18,8 @@ walking.
 
 ## Journal Entries
 
-- [2026-04-02 — Day 0: Environment Recon & Repo Bootstrap](entries/2026-04-02-day0-bootstrap.md)
-
+- [2026-04-02 — Day 0 — Environment Recon & Repo Bootstrap](entries/2026-04-02-day0-bootstrap.md)
+- [2026-04-02 — Chapter 1 — GitHub CLI (`gh`)](entries/2026-04-02-chapter1-gh-cli.md)
 ---
 
 ## Chapters (planned)
