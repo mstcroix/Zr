@@ -181,7 +181,27 @@ wsl -e lsb_release -a
 
 ---
 
-## 009 — (Upcoming) Toolchain inside WSL2
+## 009 — Companion server (PowerShell HttpListener)
+
+**Status:** DONE — 2026-04-02
+
+No Python or Node installed yet. Serves `C:\Users\ACER\bitacora\` on port 7000.
+
+```powershell
+# Run from repo root — no admin needed
+powershell -ExecutionPolicy Bypass -File doc.companion.server.ps1
+```
+
+Open companion UI:
+```
+http://localhost:7000/doc.companion.html
+```
+
+Stop: `Ctrl+C` in the PowerShell window.
+
+---
+
+## 010 — (Upcoming) Toolchain inside WSL2
 
 > To be documented after WSL2 is running.
 

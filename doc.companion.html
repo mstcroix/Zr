@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zr — Companion</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/core.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+<style>
+  :root {
+    --bg:        #0d1117;
+    --surface:   #161b22;
+    --border:    #30363d;
+    --accent:    #58a6ff;
+    --accent2:   #3fb950;
+    --warn:      #d29922;
+    --danger:    #f85149;
+    --text:      #e6edf3;
+    --muted:     #8b949e;
+    --highlight: rgba(88,166,255,0.15);
+    --radius:    8px;
+    --font-mono: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-sans); font-size: 14px;
+    display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+  }
+
+  /* ── TOP BAR ── */
+  #topbar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 16px; background: var(--surface);
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  #topbar .logo { font-size: 18px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
+  #topbar .tagline { color: var(--muted); font-size: 12px; }
+  #topbar .spacer { flex: 1; }
+  #topbar .badge {
+    padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    background: rgba(63,185,80,0.15); color: var(--accent2); border: 1px solid var(--accent2);
+  }
+
+  /* ── LAYOUT ── */
+  #layout { display: flex; flex: 1; overflow: hidden; }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width: 240px; background: var(--surface); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto;
+  }
+  .sidebar-section { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .sidebar-label {
+    padding: 4px 16px; font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px; color: var(--muted);
+  }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 16px; cursor: pointer; transition: background 0.15s;
+    font-size: 13px; color: var(--text); border: none; background: none;
+    width: 100%; text-align: left;
+  }
+  .sidebar-item:hover { background: var(--highlight); }
+  .sidebar-item.active { background: var(--highlight); color: var(--accent); }
+  .sidebar-item .icon { font-size: 14px; width: 18px; text-align: center; }
+  .sidebar-item .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sidebar-item .tag {
+    font-size: 10px; padding: 1px 6px; border-radius: 10px;
+    background: rgba(88,166,255,0.15); color: var(--accent);
+  }
+
+  /* ── MAIN ── */
+  #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* ── TABS ── */
+  #tabs {
+    display: flex; gap: 0; background: var(--bg);
+    border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto;
+  }
+  .tab {
+    padding: 10px 20px; cursor: pointer; font-size: 13px; color: var(--muted);
+    border-bottom: 2px solid transparent; white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── CONTENT ── */
+  #content { flex: 1; overflow-y: auto; padding: 24px 32px; }
+
+  /* ── MARKDOWN ── */
+  .md-body h1 { font-size: 22px; font-weight: 700; margin-bottom: 16px; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+  .md-body h2 { font-size: 17px; font-weight: 600; margin: 24px 0 12px; color: var(--accent); }
+  .md-body h3 { font-size: 14px; font-weight: 600; margin: 18px 0 8px; color: var(--accent2); }
+  .md-body p { line-height: 1.7; margin-bottom: 12px; color: var(--text); }
+  .md-body blockquote { border-left: 3px solid var(--accent); padding: 8px 16px; margin: 12px 0; background: var(--highlight); border-radius: 0 var(--radius) var(--radius) 0; }
+  .md-body blockquote p { color: var(--muted); margin: 0; }
+  .md-body code { font-family: var(--font-mono); font-size: 12px; background: #1c2128; padding: 2px 6px; border-radius: 4px; color: #79c0ff; }
+  .md-body pre { margin: 12px 0; border-radius: var(--radius); overflow: auto; }
+  .md-body pre code { background: none; padding: 0; color: inherit; }
+  .md-body table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+  .md-body th { background: #1c2128; padding: 8px 12px; text-align: left; color: var(--accent); border: 1px solid var(--border); font-weight: 600; }
+  .md-body td { padding: 7px 12px; border: 1px solid var(--border); vertical-align: top; }
+  .md-body tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  .md-body ul, .md-body ol { padding-left: 20px; margin-bottom: 12px; }
+  .md-body li { margin-bottom: 4px; line-height: 1.6; }
+  .md-body hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+  .md-body a { color: var(--accent); text-decoration: none; }
+  .md-body a:hover { text-decoration: underline; }
+
+  /* ── HIGHLIGHT BOX ── */
+  .highlight-box {
+    border: 1px solid var(--accent); border-radius: var(--radius);
+    background: var(--highlight); padding: 12px 16px; margin: 12px 0;
+    position: relative;
+  }
+  .highlight-box::before {
+    content: attr(data-label);
+    position: absolute; top: -10px; left: 12px;
+    background: var(--accent); color: var(--bg);
+    font-size: 10px; font-weight: 700; padding: 2px 8px;
+    border-radius: 10px; letter-spacing: 0.5px;
+  }
+
+  /* ── EXPANDABLE NODE ── */
+  .expand-node { margin: 6px 0; }
+  .expand-trigger {
+    display: flex; align-items: center; gap: 8px; cursor: pointer;
+    padding: 8px 12px; border-radius: var(--radius);
+    background: var(--surface); border: 1px solid var(--border);
+    transition: border-color 0.15s, background 0.15s;
+    user-select: none;
+  }
+  .expand-trigger:hover { border-color: var(--accent); background: var(--highlight); }
+  .expand-trigger.open { border-color: var(--accent); }
+  .expand-icon {
+    width: 20px; height: 20px; border-radius: 4px;
+    background: var(--accent); color: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+  .expand-trigger.open .expand-icon { transform: rotate(45deg); }
+  .expand-label { font-size: 13px; font-weight: 600; flex: 1; }
+  .expand-hint { font-size: 11px; color: var(--muted); }
+  .expand-body {
+    display: none; margin: 4px 0 4px 28px;
+    border-left: 2px solid var(--border); padding-left: 16px;
+  }
+  .expand-body.open { display: block; }
+
+  /* ── WIZARD ── */
+  #wizard { display: none; flex-direction: column; height: 100%; }
+  #wizard.active { display: flex; }
+  .wizard-progress {
+    padding: 16px 32px 0; display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+  }
+  .wizard-step-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    border: 2px solid var(--border); color: var(--muted); background: var(--bg);
+    transition: all 0.2s;
+  }
+  .wizard-step-dot.done { background: var(--accent2); border-color: var(--accent2); color: var(--bg); }
+  .wizard-step-dot.current { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .wizard-connector { flex: 1; height: 2px; background: var(--border); max-width: 40px; }
+  .wizard-body { flex: 1; overflow-y: auto; padding: 20px 32px; }
+  .wizard-footer {
+    padding: 16px 32px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+    background: var(--surface);
+  }
+  .wizard-question { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+  .wizard-subtitle { color: var(--muted); font-size: 13px; margin-bottom: 20px; line-height: 1.6; }
+  .wizard-input {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 14px; border-radius: var(--radius);
+    font-family: var(--font-sans); font-size: 14px; outline: none;
+    transition: border-color 0.15s;
+  }
+  .wizard-input:focus { border-color: var(--accent); }
+  .wizard-textarea {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 14px; border-radius: var(--radius);
+    font-family: var(--font-mono); font-size: 13px; outline: none; resize: vertical;
+    min-height: 80px; transition: border-color 0.15s;
+  }
+  .wizard-textarea:focus { border-color: var(--accent); }
+  .option-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 8px; }
+  .option-card {
+    padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius);
+    cursor: pointer; transition: all 0.15s; background: var(--surface);
+  }
+  .option-card:hover { border-color: var(--accent); background: var(--highlight); }
+  .option-card.selected { border-color: var(--accent2); background: rgba(63,185,80,0.1); }
+  .option-card .opt-title { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+  .option-card .opt-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+  .preview-box {
+    background: #1c2128; border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 16px; font-family: var(--font-mono); font-size: 12px;
+    color: #79c0ff; line-height: 1.7; margin-top: 16px; white-space: pre-wrap;
+  }
+  .preview-box .preview-label {
+    font-family: var(--font-sans); font-size: 10px; font-weight: 700;
+    text-transform: uppercase; color: var(--muted); letter-spacing: 1px; margin-bottom: 8px;
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    padding: 8px 18px; border-radius: var(--radius); font-size: 13px; font-weight: 600;
+    cursor: pointer; border: none; transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: var(--bg); }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-success { background: var(--accent2); color: var(--bg); }
+  .btn-success:hover { opacity: 0.85; }
+  .spacer { flex: 1; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--accent2); color: var(--bg);
+    padding: 10px 20px; border-radius: var(--radius); font-weight: 600;
+    font-size: 13px; opacity: 0; transition: opacity 0.3s; pointer-events: none;
+    z-index: 1000;
+  }
+  #toast.show { opacity: 1; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="logo">Zr</div>
+  <div class="tagline">Build from source · Companion</div>
+  <div class="spacer"></div>
+  <div class="badge">● Live</div>
+</div>
+
+<!-- LAYOUT -->
+<div id="layout">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigate</div>
+      <button class="sidebar-item active" onclick="showView('viewer','README.md')">
+        <span class="icon">📋</span><span class="name">README.md</span><span class="tag">index</span>
+      </button>
+      <button class="sidebar-item" onclick="showView('viewer','process.configuration-mgmnt.md')">
+        <span class="icon">⚙️</span><span class="name">process.config-mgmnt</span>
+      </button>
+      <button class="sidebar-item" onclick="showView('viewer','install.md')">
+        <span class="icon">📦</span><span class="name">install.md</span>
+      </button>
+      <button class="sidebar-item" onclick="showView('viewer','prompts.md')">
+        <span class="icon">💬</span><span class="name">prompts.md</span>
+      </button>
+      <button class="sidebar-item" onclick="showView('viewer','doc.companion.html')">
+        <span class="icon">🤝</span><span class="name">doc.companion.html</span><span class="tag">this</span>
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Journal Entries</div>
+      <button class="sidebar-item" onclick="showView('viewer','entries/2026-04-02-day0-bootstrap.md')">
+        <span class="icon">📖</span><span class="name">Day 0 — Bootstrap</span>
+      </button>
+      <button class="sidebar-item" onclick="showView('viewer','entries/2026-04-02-chapter1-gh-cli.md')">
+        <span class="icon">📖</span><span class="name">Chapter 1 — gh CLI</span>
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Tools</div>
+      <button class="sidebar-item" onclick="showView('wizard',null)">
+        <span class="icon">🧭</span><span class="name">CLAUDE.md Wizard</span><span class="tag">new</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+    <div id="tabs">
+      <div class="tab active" id="tab-viewer" onclick="switchTab('viewer')">Viewer</div>
+      <div class="tab" id="tab-wizard" onclick="switchTab('wizard')">CLAUDE.md Wizard</div>
+    </div>
+
+    <!-- VIEWER -->
+    <div id="view-viewer" style="flex:1;overflow-y:auto;padding:24px 32px;">
+      <div id="md-content" class="md-body"></div>
+    </div>
+
+    <!-- WIZARD -->
+    <div id="view-wizard" id="wizard" style="display:none;flex-direction:column;height:100%;overflow:hidden;">
+      <div class="wizard-progress" id="wizard-progress"></div>
+      <div class="wizard-body" id="wizard-body"></div>
+      <div class="wizard-footer">
+        <button class="btn btn-secondary" id="btn-back" onclick="wizardBack()">← Back</button>
+        <div class="spacer"></div>
+        <div style="font-size:12px;color:var(--muted);" id="wizard-step-label"></div>
+        <div class="spacer"></div>
+        <button class="btn btn-primary" id="btn-next" onclick="wizardNext()">Continue →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── FILE CONTENTS (embedded) ──────────────────────────────────────────────────
+const FILES = {};
+
+// ── LOAD FILE VIA FETCH (works when served; falls back to embedded) ───────────
+async function loadFile(name) {
+  if (FILES[name]) return FILES[name];
+  try {
+    const r = await fetch(name);
+    if (!r.ok) throw new Error();
+    return await r.text();
+  } catch {
+    return `# ${name}\n\n> This file could not be loaded in standalone mode.\n> Open this companion from a local server for full file browsing.\n\n**Tip:** Run from the repo root:\n\`\`\`bash\npython3 -m http.server 7000\n\`\`\`\nThen open: http://localhost:7000/doc.companion.html`;
+  }
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('view-viewer').style.display = tab === 'viewer' ? 'block' : 'none';
+  document.getElementById('view-wizard').style.display = tab === 'wizard' ? 'flex' : 'none';
+  if (tab === 'wizard') renderWizardStep();
+}
+
+// ── VIEWER ────────────────────────────────────────────────────────────────────
+let activeFile = 'README.md';
+
+async function showView(type, file) {
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  if (type === 'wizard') { switchTab('wizard'); return; }
+  switchTab('viewer');
+  activeFile = file;
+  const raw = await loadFile(file);
+  const html = marked.parse(raw);
+  const el = document.getElementById('md-content');
+  el.innerHTML = html;
+  // Wrap expandable sections
+  wrapExpandable(el);
+  // Syntax highlight
+  el.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b));
+  // Scroll top
+  document.getElementById('view-viewer').scrollTop = 0;
+}
+
+function wrapExpandable(el) {
+  // Any <h2> or <h3> gets an expand toggle
+  const headers = el.querySelectorAll('h2, h3');
+  headers.forEach(h => {
+    const level = h.tagName;
+    const trigger = document.createElement('div');
+    trigger.className = 'expand-trigger open';
+    trigger.innerHTML = `<div class="expand-icon">+</div>
+      <div class="expand-label">${h.innerHTML}</div>
+      <div class="expand-hint">click to collapse</div>`;
+
+    const body = document.createElement('div');
+    body.className = 'expand-body open';
+
+    // Move siblings until next same-level or higher header into body
+    let sib = h.nextSibling;
+    const toMove = [];
+    while (sib) {
+      const next = sib.nextSibling;
+      if (sib.nodeType === 1 && sib.tagName === level) break;
+      if (sib.nodeType === 1 && level === 'H2' && sib.tagName === 'H2') break;
+      toMove.push(sib);
+      sib = next;
+    }
+    toMove.forEach(n => body.appendChild(n));
+
+    const node = document.createElement('div');
+    node.className = 'expand-node';
+    node.appendChild(trigger);
+    node.appendChild(body);
+
+    h.replaceWith(node);
+
+    trigger.addEventListener('click', () => {
+      trigger.classList.toggle('open');
+      body.classList.toggle('open');
+      trigger.querySelector('.expand-hint').textContent =
+        trigger.classList.contains('open') ? 'click to collapse' : 'click to expand';
+    });
+  });
+}
+
+// ── WIZARD ────────────────────────────────────────────────────────────────────
+const WIZARD_STEPS = [
+  {
+    id: 'intro',
+    question: 'Welcome to the CLAUDE.md Wizard',
+    subtitle: 'CLAUDE.md is a special file that lives in your repo root. Claude reads it automatically at the start of every conversation — it becomes your persistent voice inside the AI. This wizard will help you define it step by step, intuitively.\n\nYou don\'t need to know anything about it. Just answer the questions.',
+    type: 'info',
+    preview: null
+  },
+  {
+    id: 'project_name',
+    question: 'What is this project called and what does it do?',
+    subtitle: 'Write it like you\'d explain it to a new colleague in 2 sentences. This becomes the opening context Claude reads every session.',
+    type: 'textarea',
+    placeholder: 'e.g. Zr is a from-source build journal for Windows → WSL2 → Python → enterprise atomic apps. It documents every install, compile, and config step with full audit trail.',
+    key: 'project_desc',
+    preview: (v) => `# CLAUDE.md\n\n## Project\n${v}`
+  },
+  {
+    id: 'shell',
+    question: 'What shell and OS are we working in?',
+    subtitle: 'This tells Claude which commands to use, which paths to expect, and what tools are available.',
+    type: 'options',
+    options: [
+      { id: 'gitbash', title: 'Git Bash (Windows)', desc: 'MINGW64, Windows paths, Unix commands' },
+      { id: 'wsl2', title: 'WSL2 / Ubuntu', desc: 'Real Linux kernel on Windows' },
+      { id: 'both', title: 'Both (transition)', desc: 'Git Bash now → WSL2 soon (our current state)' },
+      { id: 'powershell', title: 'PowerShell', desc: 'Native Windows PS' },
+    ],
+    key: 'shell',
+    preview: (v) => `## Environment\n- Shell: ${v}\n- Platform: Windows 10 Home 22H2 (build 19045)\n- Machine: DESKTOP-ICIQ279`
+  },
+  {
+    id: 'commands',
+    question: 'What are the key commands to know?',
+    subtitle: 'Claude will use these when you say "run the tests" or "build it". List the commands that matter most.',
+    type: 'textarea',
+    placeholder: 'e.g.\n# commit with hook\ngit add <files> && git commit -m "..."\n\n# push\ngit push\n\n# check gh auth\ngh auth status',
+    key: 'commands',
+    preview: (v) => `## Commands\n\`\`\`bash\n${v}\n\`\`\``
+  },
+  {
+    id: 'conventions',
+    question: 'What naming and style rules should Claude always follow?',
+    subtitle: 'These are your hard rules — the things Claude must never violate. Think of them as laws, not suggestions.',
+    type: 'checklist',
+    checks: [
+      { id: 'kebab', label: 'kebab-case for all filenames', default: true },
+      { id: 'prefix', label: 'File prefixes: process. / doc. / log. / entries/', default: true },
+      { id: 'atomic', label: 'Atomic git commits — one concern per commit', default: true },
+      { id: 'prompt_log', label: 'Every answer logged to prompts.md with a commit', default: true },
+      { id: 'install_log', label: 'Every install/config command logged to install.md', default: true },
+      { id: 'no_force', label: 'Never force-push to master', default: true },
+      { id: 'no_amend', label: 'Never amend published commits', default: true },
+    ],
+    key: 'conventions',
+    preview: (v) => `## Conventions\n${v.map(c => `- ${c}`).join('\n')}`
+  },
+  {
+    id: 'dont',
+    question: 'What should Claude NEVER do in this project?',
+    subtitle: 'These are your veto rules. Claude will treat these as hard blocks — never do these regardless of context.',
+    type: 'textarea',
+    placeholder: 'e.g.\n- Never rename existing files (preserves git history)\n- Never skip the commit hook (--no-verify)\n- Never add unrequested features\n- Never edit prompts.md retroactively',
+    key: 'dont',
+    preview: (v) => `## Never Do\n${v}`
+  },
+  {
+    id: 'memory',
+    question: 'What should Claude always remember about you?',
+    subtitle: 'Personal context that shapes how Claude works with you — your background, your preferences, your pace.',
+    type: 'textarea',
+    placeholder: 'e.g.\n- Spanish is my first language but I work in English\n- I prefer commands I can run myself to be shown first\n- I learn by doing, not reading theory\n- I want to understand every step, not just copy-paste',
+    key: 'memory',
+    preview: (v) => `## About Marco\n${v}`
+  },
+  {
+    id: 'finish',
+    question: 'Your CLAUDE.md is ready.',
+    subtitle: 'Review the generated file below. Click "Save CLAUDE.md" to write it to the repo root. Claude will pick it up on the next conversation automatically.',
+    type: 'final',
+    preview: null
+  }
+];
+
+const wizardData = {};
+let wizardStep = 0;
+
+function renderWizardProgress() {
+  const el = document.getElementById('wizard-progress');
+  let html = '';
+  WIZARD_STEPS.forEach((s, i) => {
+    if (i > 0) html += '<div class="wizard-connector"></div>';
+    const cls = i < wizardStep ? 'done' : i === wizardStep ? 'current' : '';
+    html += `<div class="wizard-step-dot ${cls}" onclick="wizardGoto(${i})" title="${s.question}">${i < wizardStep ? '✓' : i + 1}</div>`;
+  });
+  el.innerHTML = html;
+  document.getElementById('wizard-step-label').textContent = `Step ${wizardStep + 1} of ${WIZARD_STEPS.length}`;
+}
+
+function buildPreview() {
+  const lines = [];
+  lines.push('# CLAUDE.md\n');
+  if (wizardData.project_desc) lines.push(`## Project\n${wizardData.project_desc}\n`);
+  if (wizardData.shell) {
+    const shells = { gitbash: 'Git Bash (MINGW64) on Windows 10 22H2', wsl2: 'WSL2 Ubuntu on Windows 10 22H2', both: 'Git Bash now → WSL2 (in progress)', powershell: 'PowerShell on Windows 10 22H2' };
+    lines.push(`## Environment\n- Shell: ${shells[wizardData.shell] || wizardData.shell}\n- Platform: Windows 10 Home 22H2 (build 19045)\n- Machine: DESKTOP-ICIQ279\n- User: Marco Santacruz (mstcroix)\n`);
+  }
+  if (wizardData.commands) lines.push(`## Commands\n\`\`\`bash\n${wizardData.commands}\n\`\`\`\n`);
+  if (wizardData.conventions && wizardData.conventions.length) lines.push(`## Conventions\n${wizardData.conventions.map(c => `- ${c}`).join('\n')}\n`);
+  if (wizardData.dont) lines.push(`## Never Do\n${wizardData.dont}\n`);
+  if (wizardData.memory) lines.push(`## About Marco\n${wizardData.memory}\n`);
+  return lines.join('\n');
+}
+
+function renderWizardStep() {
+  renderWizardProgress();
+  const step = WIZARD_STEPS[wizardStep];
+  const body = document.getElementById('wizard-body');
+  const btnNext = document.getElementById('btn-next');
+  const btnBack = document.getElementById('btn-back');
+
+  btnBack.style.display = wizardStep === 0 ? 'none' : 'flex';
+  btnNext.textContent = wizardStep === WIZARD_STEPS.length - 1 ? '✓ Done' : 'Continue →';
+
+  let html = `<div class="wizard-question">${step.question}</div>
+    <div class="wizard-subtitle">${step.subtitle.replace(/\n/g,'<br>')}</div>`;
+
+  if (step.type === 'info') {
+    html += `<div class="highlight-box" data-label="WHY THIS MATTERS">
+      <p>CLAUDE.md makes Claude behave consistently across every conversation — it carries your rules, your style, your context. Without it, every session starts cold. With it, Claude already knows everything.</p>
+      <p style="margin-top:8px;color:var(--muted)">This wizard takes about 5 minutes. Every choice is saved locally. You can come back and edit anytime.</p>
+    </div>`;
+  }
+
+  if (step.type === 'textarea') {
+    const val = wizardData[step.key] || '';
+    html += `<textarea class="wizard-textarea" id="wizard-input" rows="6" placeholder="${step.placeholder}">${val}</textarea>`;
+    if (step.preview && val) {
+      html += `<div class="preview-box"><div class="preview-label">Preview in CLAUDE.md</div>${step.preview(val)}</div>`;
+    }
+  }
+
+  if (step.type === 'options') {
+    const sel = wizardData[step.key] || '';
+    html += '<div class="option-grid">';
+    step.options.forEach(o => {
+      html += `<div class="option-card ${sel === o.id ? 'selected' : ''}" onclick="selectOption('${step.key}','${o.id}',this)">
+        <div class="opt-title">${o.title}</div>
+        <div class="opt-desc">${o.desc}</div>
+      </div>`;
+    });
+    html += '</div>';
+    if (step.preview && sel) {
+      html += `<div class="preview-box"><div class="preview-label">Preview in CLAUDE.md</div>${step.preview(sel)}</div>`;
+    }
+  }
+
+  if (step.type === 'checklist') {
+    if (!wizardData[step.key]) wizardData[step.key] = step.checks.filter(c => c.default).map(c => c.label);
+    html += '<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">';
+    step.checks.forEach(c => {
+      const checked = wizardData[step.key].includes(c.label);
+      html += `<label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;">
+        <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleCheck('${step.key}','${c.label}',this)"
+          style="width:16px;height:16px;accent-color:var(--accent2);">
+        <span style="font-size:13px;">${c.label}</span>
+      </label>`;
+    });
+    html += '</div>';
+  }
+
+  if (step.type === 'final') {
+    const preview = buildPreview();
+    html += `<div class="preview-box"><div class="preview-label">CLAUDE.md — Full Preview</div>${escHtml(preview)}</div>
+    <div style="margin-top:16px;display:flex;gap:10px;">
+      <button class="btn btn-success" onclick="saveClaude()">💾 Save CLAUDE.md to repo</button>
+      <button class="btn btn-secondary" onclick="copyToClipboard()">📋 Copy to clipboard</button>
+    </div>`;
+  }
+
+  body.innerHTML = html;
+
+  // Attach live preview for textarea
+  if (step.type === 'textarea') {
+    const inp = document.getElementById('wizard-input');
+    if (inp) inp.addEventListener('input', () => {
+      wizardData[step.key] = inp.value;
+      renderWizardStep();
+    });
+  }
+}
+
+function selectOption(key, val, el) {
+  wizardData[key] = val;
+  document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  renderWizardStep();
+}
+
+function toggleCheck(key, label, el) {
+  if (!wizardData[key]) wizardData[key] = [];
+  if (el.checked) { if (!wizardData[key].includes(label)) wizardData[key].push(label); }
+  else { wizardData[key] = wizardData[key].filter(l => l !== label); }
+}
+
+function wizardNext() {
+  const step = WIZARD_STEPS[wizardStep];
+  // Save textarea value
+  const inp = document.getElementById('wizard-input');
+  if (inp && step.key) wizardData[step.key] = inp.value;
+  if (wizardStep < WIZARD_STEPS.length - 1) { wizardStep++; renderWizardStep(); }
+}
+function wizardBack() { if (wizardStep > 0) { wizardStep--; renderWizardStep(); } }
+function wizardGoto(i) { wizardStep = i; renderWizardStep(); }
+
+async function saveClaude() {
+  const content = buildPreview();
+  try {
+    // Try to write via fetch to a local write endpoint
+    const r = await fetch('/write-claude-md', { method: 'POST', body: content });
+    if (r.ok) { toast('CLAUDE.md saved!'); return; }
+  } catch {}
+  // Fallback: download
+  const a = document.createElement('a');
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(content);
+  a.download = 'CLAUDE.md';
+  a.click();
+  toast('CLAUDE.md downloaded — move it to the repo root.');
+}
+
+function copyToClipboard() {
+  navigator.clipboard.writeText(buildPreview());
+  toast('Copied to clipboard!');
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+marked.setOptions({ gfm: true, breaks: false });
+showView('viewer', 'README.md');
+renderWizardStep();
+
+// load hljs langs lazily
+const hljsScript = document.createElement('script');
+hljsScript.src = 'https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/common.min.js';
+document.head.appendChild(hljsScript);
+</script>
+</body>
+</html>

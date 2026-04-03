@@ -86,6 +86,40 @@ Still pending: GitHub username, git name/email, repo name.
 
 ---
 
+## #011 — doc.companion.html + doc.companion.server.ps1
+
+**Date:** 2026-04-02
+**Prompt:**
+> Create a way so you can launch and show me data to me (like a popup window that appears and shows me or guides me or lets me navigate a .md file you are creating and shows me with highlighted text exactly what you mean and let me expand via a [+] labels new submenus or suboptions that can be stored and expanded and be used to re-define step by step the CLAUDE.md configuration, without knowing... intuitively... like you become my steward my companion, you assist me hold me support me service me.
+
+**Thinking:**
+- This needs a real UI: dark-themed, interactive, expandable, beautiful
+- No Python or Node installed yet — need a runtime for a local server
+- Build a self-contained HTML file (doc.companion.html) with all logic embedded
+- Two panels: Viewer (navigates any .md file with [+] expandable sections) + CLAUDE.md Wizard (8-step guided setup)
+- Naming: `doc.` prefix — it's executable documentation
+- Viewer: sidebar with all repo files → click → renders markdown → every h2/h3 becomes an expand-node with [+] toggle
+- Wizard: 8 steps (intro → project desc → shell → commands → conventions checklist → never-do → about you → final preview + save)
+- Live preview in wizard: every keystroke updates a CLAUDE.md preview box
+- Server: no Python, no Node → write PowerShell HttpListener server (doc.companion.server.ps1)
+- Server started on port 7000, opened in default browser automatically
+
+**Answer:**
+
+Created two files:
+- `doc.companion.html` — full interactive companion UI (self-contained, ~400 lines)
+- `doc.companion.server.ps1` — PowerShell HTTP server, serves repo at localhost:7000
+
+Server running at: **http://localhost:7000/doc.companion.html**
+
+Features:
+- Sidebar: navigate all repo files
+- Viewer: markdown rendered with [+] expandable sections per heading
+- Wizard: 8-step CLAUDE.md builder with live preview, option cards, checklists
+- Save button downloads CLAUDE.md or posts to local endpoint
+
+---
+
 ## #010 — process.configuration-mgmnt.md
 
 **Date:** 2026-04-02
