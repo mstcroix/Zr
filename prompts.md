@@ -86,6 +86,36 @@ Still pending: GitHub username, git name/email, repo name.
 
 ---
 
+## #007 — Create install.md bitacora
+
+**Date:** 2026-04-02
+**Prompt:**
+> Create, mantain and keep under version control another bitacora named install.md with all the install commands and configuration commands you needed to prepare our environment setup.
+
+**Thinking:**
+- Companion file to prompts.md — focused purely on commands, not conversation
+- Must be a reproducible recipe: someone with a fresh Windows 10 machine should be able to follow it top to bottom
+- Include everything done so far: git (pre-installed), git config, git init, gh install via winget, PATH fix
+- Mark pending steps clearly: gh auth (needs browser), repo create, push, WSL2, toolchain, CPython
+- Keep it ordered, numbered, with verify commands after each step
+- Same commit-per-update discipline as prompts.md
+
+**Answer:**
+
+Created `install.md` with 10 sections covering the full setup sequence:
+- 001: Git (pre-installed, verify only)
+- 002: `git config` identity
+- 003: `git init` bitacora repo
+- 004: `winget install --id GitHub.cli` → gh 2.89.0 ✓
+- 005: `gh auth login` (PENDING — browser flow)
+- 006: `gh repo create Zr` (PENDING)
+- 007: `git remote add` + `git push` (PENDING)
+- 008: `wsl --install -d Ubuntu` (PENDING — needs admin + reboot)
+- 009: WSL2 toolchain — gcc, make, cmake (upcoming)
+- 010: CPython from source (upcoming)
+
+---
+
 ## #006 — Run gh install yourself
 
 **Date:** 2026-04-02
