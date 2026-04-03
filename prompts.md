@@ -86,6 +86,37 @@ Still pending: GitHub username, git name/email, repo name.
 
 ---
 
+## #006 — Run gh install yourself
+
+**Date:** 2026-04-02
+**Prompt:**
+> run it yourself
+
+**Thinking:**
+- Run `winget install --id GitHub.cli` directly via Bash tool
+- Background the process, poll output file for completion
+- winget downloaded `gh_2.89.0_windows_amd64.msi` (14 MB) from GitHub releases
+- MSI installer ran silently — "Instalado correctamente"
+- PATH not auto-updated in current shell — manually append `/c/Program Files/GitHub CLI`
+- `gh --version` confirms: `gh version 2.89.0 (2026-03-26)`
+- `gh auth login` requires interactive browser flow — cannot be automated, must be run by user
+
+**Answer:**
+
+`gh` 2.89.0 installed successfully via winget.
+
+- Downloaded: `gh_2.89.0_windows_amd64.msi` (14 MB)
+- Install path: `C:\Program Files\GitHub CLI\`
+- Hash verified by winget before install
+
+Next step requires user action — run in terminal:
+```bash
+gh auth login
+```
+Choose: GitHub.com → HTTPS → Login with web browser → authorize at github.com/login/device
+
+---
+
 ## #005 — Install gh CLI before creating repo
 
 **Date:** 2026-04-02

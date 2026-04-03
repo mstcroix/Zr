@@ -99,9 +99,9 @@ git push -u origin master
 | Step | Status | Notes |
 |---|---|---|
 | winget available | CONFIRMED — v1.28.220 | |
-| `winget install GitHub.cli` | pending | |
-| `gh --version` | pending | |
-| `gh auth login` | pending | |
+| `winget install GitHub.cli` | DONE | v2.89.0 — `gh_2.89.0_windows_amd64.msi` |
+| `gh --version` | DONE | `gh version 2.89.0 (2026-03-26)` |
+| `gh auth login` | pending | requires browser — user must run manually |
 | `gh repo create Zr` | pending | |
 | `git push -u origin master` | pending | |
 
