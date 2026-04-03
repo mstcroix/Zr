@@ -86,6 +86,36 @@ Still pending: GitHub username, git name/email, repo name.
 
 ---
 
+## #010 — process.configuration-mgmnt.md
+
+**Date:** 2026-04-02
+**Prompt:**
+> Now a new bitacora for the whole configuration management process: process.configuration-mgmnt.md — make auditable all the git commits, our file structure, naming conventions, etc. Everything should be defined and have a purpose: a why and a what for to exist.
+
+**Thinking:**
+- This is not a log (no `log.` prefix) and not executable (no `doc.` prefix) — it is a process definition, so `process.` prefix is correct
+- Must cover: repo identity, file taxonomy, naming conventions, git commit standards, hook system, audit trail, decision log
+- The prefix system (`process.`, `doc.`, `log.`) was implicit before — this document makes it explicit and retroactively documents `install.md` and `prompts.md` as legacy names
+- Audit trail section must answer: how do I trace any decision back to its origin? Answer: git log → prompts.md → process.*.md (three layers)
+- Decision log captures the four major decisions made so far: WSL2, winget, GitHub, prefix taxonomy
+- Rule: this document is append-only in its Decision Log section; the rest evolves as conventions are refined
+- File goes in repo root (not entries/) — it is a standing definition, not a dated narrative
+
+**Answer:**
+
+Created `process.configuration-mgmnt.md` with 8 sections:
+
+1. **Repository Identity** — name, remote, owner, branch, visibility, local path, each with a why
+2. **File Taxonomy** — prefix system (`process.`, `doc.`, `log.`), legacy names documented
+3. **File Structure** — annotated tree, every file with purpose and rule
+4. **Naming Conventions** — kebab-case, date prefix, extension rules, abbreviation policy
+5. **Git Commit Standards** — format `<scope> #NNN — summary`, atomic commit rule, when to commit
+6. **Hook System** — architecture diagram, 5 hook rules
+7. **Audit Trail** — three-layer traceability, bash commands for auditing any file or decision
+8. **Decision Log** — 4 decisions recorded: WSL2, winget, GitHub, prefix taxonomy
+
+---
+
 ## #009 — doc.git.hook-commit.exe: auto-sync README Journal Entries
 
 **Date:** 2026-04-02
