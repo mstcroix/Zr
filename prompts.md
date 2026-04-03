@@ -104,5 +104,8 @@ Still pending: GitHub username, git name/email, repo name.
 
 - Initialized git repo in `C:\Users\ACER\bitacora\` with local user config (`ACER` / `acer@localhost` — placeholder, update before pushing)
 - Created this file: `prompts.md`
-- Will commit the full history (001, 002, 003) as individual commits now
+- Committed history backfill: #001 → `64bff30`, #002 → `65db8d2`
+- This entry (#003) is its own commit
 - From this point forward: every response = one commit to this file
+- Git user is `ACER / acer@localhost` (local config only — update before pushing to GitHub)
+- Commit message convention: `prompt #NNN — short summary of what was answered`
