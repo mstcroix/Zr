@@ -86,6 +86,36 @@ Still pending: GitHub username, git name/email, repo name.
 
 ---
 
+## #005 — Install gh CLI before creating repo
+
+**Date:** 2026-04-02
+**Prompt:**
+> B
+
+**Thinking:**
+- User chose to install `gh` CLI first — aligned with "document everything from source" philosophy
+- Check what package managers are available: `winget` v1.28.220 present, scoop/choco absent
+- `winget` is the cleanest choice: native to Windows 10, no extra tooling, leaves registry trail
+- Write full Chapter 1 entry in bitácora before executing anything
+- Walk the user through: install → verify → auth → create Zr → add remote → push
+- After `winget install`, user must reopen terminal for PATH to update
+
+**Answer:**
+
+`winget` v1.28.220 is available — chosen as the install method.
+
+Created `entries/2026-04-02-chapter1-gh-cli.md` with full step-by-step.
+
+**Run this now** (Git Bash or PowerShell, no admin needed):
+
+```bash
+winget install --id GitHub.cli
+```
+
+Then reopen the terminal and come back.
+
+---
+
 ## #004 — GitHub identity and repo name
 
 **Date:** 2026-04-02
