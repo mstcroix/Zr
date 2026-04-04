@@ -385,3 +385,50 @@ Target remote: `https://github.com/mstcroix/Zr`
 - From this point forward: every response = one commit to this file
 - Git user is `ACER / acer@localhost` (local config only — update before pushing to GitHub)
 - Commit message convention: `prompt #NNN — short summary of what was answered`
+
+---
+
+## #013 — Restructure repo, env.sh, entries→journal
+
+**Date:** 2026-04-02
+**Prompt:**
+> move entries to journal. What are logs and process? create a script that loads the variables PATH and everything needed to run comfortably all tools subtools of the project at startup
+
+**Thinking:**
+- `git mv entries/ journal/` — more semantically accurate, entries is a technical word, journal is the intent
+- logs/ = append-only records (install.md, prompts.md, log.commands.json) — the audit trail
+- process/ = standing definitions of how we work (process.configuration-mgmnt.md) — the rulebook
+- env.sh: source once → adds bin/ + tools/ to PATH, exports ZR_ROOT/ZR_DB/etc, defines aliases, prints status banner
+- Banner checks each tool with colored ✓/✗ — visual triage at startup
+- jq.exe vendored in bin/ — no system install; env.sh puts bin/ on PATH first
+- doc.cmd.exe rewritten clean with correct paths (logs/log.commands.json, bin/jq.exe)
+- doc.git.hook-commit.exe updated: entries/ → journal/ in all references
+- Note: env.sh sourcing is per-shell-session (by design); Bash tool runs in fresh shells so PATH must be re-exported each time
+
+**Answer:**
+
+Directory structure finalized:
+```
+Zr/
+├── env.sh              ← SOURCE THIS: loads PATH, exports, aliases, banner
+├── bin/                ← vendored binaries (jq 1.7.1) — on PATH after env.sh
+├── tools/              ← project scripts — on PATH after env.sh
+├── journal/            ← dated narrative entries (was: entries/)
+├── logs/               ← append-only audit trail
+├── process/            ← standing process definitions (rulebook)
+└── README.md
+```
+
+What logs/ and process/ are:
+- **logs/** = history that accumulates (install.md, prompts.md, log.commands.json). Append-only. Never edited retroactively. The receipts.
+- **process/** = rules that govern how the project works (process.configuration-mgmnt.md). Edited as conventions evolve. Each change gets its own commit.
+
+env.sh aliases after sourcing:
+- `zr` → cd to repo root
+- `cmd` → doc.cmd.exe
+- `cmds` → doc.cmd.exe list
+- `jrn` → ls journal/
+- `hook` → run hook manually
+- `companion` → start companion server
+
+doc.cmd.exe: fully operational. 22 commands, 28 total runs, most run: python --version (3×).

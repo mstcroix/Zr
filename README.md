@@ -18,9 +18,9 @@ walking.
 
 ## Journal Entries
 
-- [2026-04-02 — Day 0 — Environment Recon & Repo Bootstrap](entries/2026-04-02-day0-bootstrap.md)
-- [2026-04-02 — Chapter 1 — GitHub CLI (`gh`)](entries/2026-04-02-chapter1-gh-cli.md)
-- [2026-04-02 — Status Quo — Machine Configuration Audit](entries/2026-04-02-status-quo.md)
+- [2026-04-02 — Chapter 1 — GitHub CLI (`gh`)](journal/2026-04-02-chapter1-gh-cli.md)
+- [2026-04-02 — Day 0 — Environment Recon & Repo Bootstrap](journal/2026-04-02-day0-bootstrap.md)
+- [2026-04-02 — Status Quo — Machine Configuration Audit](journal/2026-04-02-status-quo.md)
 ---
 
 ## Chapters (planned)
