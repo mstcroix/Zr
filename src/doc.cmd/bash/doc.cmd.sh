@@ -18,7 +18,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || dirname "$(dirname "$0")")"
-DB="$REPO_ROOT/logs/log.commands.json"
+DB="$REPO_ROOT/var/log/log.commands.json"
 JQ="$REPO_ROOT/bin/jq.exe"
 TODAY="$(date +%Y-%m-%d)"
 
@@ -68,7 +68,7 @@ cmd_run() {
   info "Running: ${BLU}${key}${RST}"
   local output; output="$(eval "$key" 2>&1)" || true; echo "$output"
   if db_exists "$key"; then db_bump "$key" "$output"; ok "Counter: $(db_get "$key" count) runs"
-  else db_add "$key" "$output" "" '["new"]'; ok "Recorded in logs/log.commands.json"; fi
+  else db_add "$key" "$output" "" '["new"]'; ok "Recorded in var/log/log.commands.json"; fi
 }
 
 cmd_check() {

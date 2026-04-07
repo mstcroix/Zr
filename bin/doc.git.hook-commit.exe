@@ -12,13 +12,13 @@ set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 README="$REPO_ROOT/README.md"
-JOURNAL_DIR="$REPO_ROOT/journal"
+JOURNAL_DIR="$REPO_ROOT/mnt/journal"
 
 # ── 1. Build the new Journal Entries block ────────────────────────────────────
 new_block="## Journal Entries\n"
 
 if ls "$JOURNAL_DIR"/*.md 1>/dev/null 2>&1; then
-    committed_files=$(git log --name-only --diff-filter=A --format="" --reverse -- "journal/*.md" 2>/dev/null | grep -v '^$' || true)
+    committed_files=$(git log --name-only --diff-filter=A --format="" --reverse -- "mnt/journal/*.md" 2>/dev/null | grep -v '^$' || true)
     all_files=$(ls -1 "$JOURNAL_DIR"/*.md | sed "s|$REPO_ROOT/||")
     new_files=$(comm -23 <(echo "$all_files" | sort) <(echo "$committed_files" | sort))
     ordered="${committed_files}${new_files:+$'\n'$new_files}"
@@ -30,7 +30,7 @@ if ls "$JOURNAL_DIR"/*.md 1>/dev/null 2>&1; then
         filename="$(basename "$filepath")"
         date_part="${filename:0:10}"
         title=$(grep -m1 '^# ' "$filepath" | sed 's/^# //')
-        new_block="${new_block}\n- [${date_part} — ${title}](journal/${filename})"
+        new_block="${new_block}\n- [${date_part} — ${title}](mnt/journal/${filename})"
     done <<< "$ordered"
 else
     new_block="${new_block}\n*(no entries yet)*"

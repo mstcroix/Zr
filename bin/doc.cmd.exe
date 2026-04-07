@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# bin/doc.cmd.exe — Command Database Dispatcher
+# ─────────────────────────────────────────────────────────────────────────────
+# Single entry point. Selects the best available implementation and exec's in.
+# Priority: Rust > Zig > C > C++ > Python > Java > Node.js > Bash (fallback)
+# ─────────────────────────────────────────────────────────────────────────────
+
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null \
+    || dirname "$(dirname "$(readlink -f "$0" 2>/dev/null || echo "$0")")")"
+SRC="$REPO_ROOT/src/doc.cmd"
+
+case "$OSTYPE" in msys*|cygwin*|win32*) EXT=".exe" ;; *) EXT="" ;; esac
+
+# compiled native — fastest
+for bin in \
+    "$SRC/rust/target/release/doc-cmd${EXT}" \
+    "$SRC/zig/zig-out/bin/doc-cmd${EXT}"     \
+    "$SRC/c/doc_cmd${EXT}"                   \
+    "$SRC/cpp/doc_cmd${EXT}"; do
+    [[ -f "$bin" && -x "$bin" ]] && exec "$bin" "$@"
+done
+
+# python — if real interpreter present (not Windows Store stub)
+if [[ -f "$SRC/python/doc_cmd.py" ]]; then
+    for py in python3 python; do
+        if command -v "$py" &>/dev/null && "$py" -c "import sys" &>/dev/null 2>&1; then
+            exec "$py" "$SRC/python/doc_cmd.py" "$@"
+        fi
+    done
+fi
+
+# java — if compiled
+[[ -f "$SRC/java/DocCmd.class" ]] && command -v java &>/dev/null && \
+    exec java -cp "$SRC/java" DocCmd "$@"
+
+# node.js — if TypeScript compiled
+[[ -f "$SRC/typescript/dist/index.js" ]] && command -v node &>/dev/null && \
+    exec node "$SRC/typescript/dist/index.js" "$@"
+
+# bash — guaranteed fallback
+exec bash "$SRC/bash/doc.cmd.sh" "$@"
